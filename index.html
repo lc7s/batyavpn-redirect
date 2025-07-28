@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Перенаправление...</title>
+    <meta charset="utf-8">
+    <script type="text/javascript">
+        function redirect() {
+            // Получаем параметры из URL
+            const urlParams = new URLSearchParams(window.location.search);
+            // Получаем значение параметра 'key'
+            const vlessKey = urlParams.get('key');
+
+            if (vlessKey) {
+                // Если ключ есть, декодируем его и выполняем редирект
+                window.location.href = decodeURIComponent(vlessKey);
+            } else {
+                // Если ключа нет, выводим сообщение
+                document.body.innerText = "Ошибка: ключ для подключения не найден.";
+            }
+        }
+    </script>
+</head>
+<body onload="redirect();">
+    <p>Пожалуйста, подождите, идет перенаправление для настройки VPN...</p>
+</body>
+</html>
