@@ -3,25 +3,95 @@
 <head>
     <title>Перенаправление...</title>
     <meta charset="utf-8">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f0f2f5;
+            color: #333;
+            padding: 20px;
+        }
+        #debug-log {
+            font-family: "Courier New", Courier, monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: 1px solid #ccc;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 8px;
+            white-space: pre-wrap; /* Позволяет переносить длинные строки */
+            word-break: break-all; /* Ломает очень длинные слова (ключ) */
+            font-size: 14px;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+        }
+        .log-success {
+            color: #8cff8c;
+        }
+        .log-error {
+            color: #ff8c8c;
+            font-weight: bold;
+        }
+        .log-info {
+            color: #87ceeb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Перенаправление...</h1>
+    <p>Пожалуйста, подождите, идет автоматическая настройка VPN.</p>
+    <p>Если ничего не происходит, посмотрите информацию в отладочном окне ниже.</p>
+
+    <!-- ОКНО ДЛЯ ОТЛАДКИ -->
+    <div id="debug-log"></div>
+
     <script type="text/javascript">
-        function redirect() {
-            // Получаем параметры из URL
+        // Функция для вывода сообщений в отладочное окно на странице
+        const logContainer = document.getElementById('debug-log');
+        function log(message, type = 'info') {
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${type.toUpperCase()}] ${message}`;
+            logContainer.appendChild(entry);
+        }
+
+        // Основная логика в блоке try...catch для отлова всех ошибок
+        try {
+            log("Скрипт запущен.");
+            log(`Полный URL: ${window.location.href}`);
+
+            // 1. Извлекаем ключ из URL
             const urlParams = new URLSearchParams(window.location.search);
-            
-            // Получаем значение параметра 'key'. Оно уже автоматически раскодировано.
+            log("Извлекаю параметр 'key' из URL...");
             const vlessKey = urlParams.get('key');
 
-            if (vlessKey) {
-                // Сразу выполняем редирект на чистый ключ.
-                window.location.href = vlessKey;
+            // 2. Проверяем, найден ли ключ
+            if (vlessKey && vlessKey.trim() !== '') {
+                log("Ключ успешно найден!", "success");
+                log(`Значение ключа: ${vlessKey}`);
+
+                // 3. Создаем и добавляем meta-тег для редиректа
+                log("Создаю meta-тег для редиректа...");
+                const meta = document.createElement('meta');
+                meta.httpEquiv = "refresh";
+                meta.content = `0; url=${vlessKey}`;
+                
+                document.head.appendChild(meta);
+                log(`Meta-тег успешно добавлен в <head>. Content: "${meta.content}"`, "success");
+                log("Перенаправление должно начаться немедленно.");
+
             } else {
-                // Если ключа нет, выводим сообщение
-                document.body.innerText = "Ошибка: ключ для подключения не найден.";
+                // Если ключ не найден или пуст
+                log("Параметр 'key' не найден или пуст в URL.", "error");
+                document.body.innerHTML += '<h2 style="color: red;">Ошибка: Не удалось найти ключ для настройки.</h2>';
             }
+        } catch (error) {
+            // Если произошла любая другая ошибка
+            log("Произошла критическая ошибка!", "error");
+            log(`Сообщение об ошибке: ${error.message}`, "error");
+            log(`Стек ошибки: ${error.stack}`, "error");
         }
     </script>
-</head>
-<body onload="redirect();">
-    <p>Пожалуйста, подождите, идет перенаправление для настройки VPN...</p>
 </body>
 </html>
